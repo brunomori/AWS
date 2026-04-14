@@ -54,7 +54,7 @@ export AWS_DEFAULT_REGION=us-east-1
 export AWS_PROFILE=meu-perfil
 ```
 
-> 💡 Na Serasa provavelmente você usa roles assumidas via SSO ou `aws sts assume-role`. Confirme com o time qual o método padrão.
+> 💡 Em empresas normalmente usam roles assumidas via SSO ou `aws sts assume-role`. Confirme com o time qual o método padrão.
 
 ---
 
