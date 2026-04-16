@@ -1,217 +1,255 @@
-# 🌐 AWS Networking - Guia Prático (Subnets, IGW, Route Tables e Tags)
+# 🌐 AWS Networking COMPLETO - VPC, Subnets, IGW, NAT Gateway (Console + CLI)
 
 ## 🎯 Objetivo
-Este guia explica de forma prática:
-- Internet Gateway (IGW)
+Guia completo e PRÁTICO com:
+- Internet Gateway
+- NAT Gateway
+- Subnets públicas e privadas
 - Route Tables
-- Subnets (pública vs privada)
-- Tags para AWS Load Balancer Controller
+- Tags para Load Balancer
+- Console + CLI
 
 ---
 
-# 🔹 1. Internet Gateway (IGW)
+# 🔹 1. Arquitetura (VISÃO GERAL)
 
-## 📌 O que é?
-O **Internet Gateway** permite comunicação entre sua VPC e a internet.
 
-👉 Sem IGW = recursos NÃO acessam a internet.
+<img width="1317" height="745" alt="image" src="https://github.com/user-attachments/assets/daa0477c-6ada-4288-92e3-e5f5e34dd60d" />
+
+
+
+
+Internet → IGW → Subnet Pública → NAT Gateway → Subnet Privada
 
 ---
 
-## ⚙️ Criar IGW (CLI)
+# 🔹 2. Internet Gateway (IGW)
+
+## 📌 Função
+Permite acesso da VPC à internet.
+
+---
+
+## 🌐 Console
+EC2 → Internet Gateways → Create  
+Depois: Attach to VPC
+
+---
+
+## ⚙️ CLI
 
 ```bash
 aws ec2 create-internet-gateway
-```
 
-### Resultado esperado:
-- Retorna um `InternetGatewayId` (ex: igw-123456)
-
----
-
-## 🔗 Associar IGW à VPC
-
-```bash
-aws ec2 attach-internet-gateway   --internet-gateway-id igw-123456   --vpc-id vpc-123456
+aws ec2 attach-internet-gateway     --internet-gateway-id igw-123     --vpc-id vpc-123
 ```
 
 ---
 
-# 🔹 2. Route Tables (Tabela de Roteamento)
+# 🔹 3. Subnets
+
+## 🌍 Pública
+- Tem rota → IGW
+- Tem IP público
+
+## 🔒 Privada
+- NÃO tem acesso direto à internet
+- Usa NAT Gateway
+
+---
+
+# 🔹 4. Route Tables
+
+## 📌 Pública (SEU CASO)
+
+| Destination | Target |
+|------------|--------|
+| 10.0.0.0/16 | local |
+| 0.0.0.0/0 | IGW |
+
+---
+
+## 📌 Privada
+
+| Destination | Target |
+|------------|--------|
+| 0.0.0.0/0 | NAT Gateway |
+
+---
+
+# 🔹 5. NAT Gateway
 
 ## 📌 O que é?
-Define **para onde o tráfego da rede vai**.
+
+Serviço que permite que instâncias **privadas saiam para internet**, sem receber conexão externa.
+
+👉 Exemplo:
+- EC2 privada baixa pacote → OK
+- Internet acessa EC2 → NÃO
 
 ---
 
-## 🧠 Exemplo prático (SEU CASO)
+# 🔹 6. Criar NAT Gateway (CONSOLE)
 
-| Destination | Target        | Explicação |
-|------------|--------------|-----------|
-| 10.0.0.0/16 | local        | Comunicação interna na VPC |
-| 0.0.0.0/0   | IGW          | Saída para internet |
+## Caminho:
+VPC → NAT Gateways → Create NAT Gateway
 
 ---
 
-## ⚙️ Criar Route Table
+## ⚙️ Configurações
+
+### Name
+```
+comunidadedevops-ngw-1a
+```
+
+---
+
+### Availability Mode
+
+- **Regional (novo)** → recomendado
+- Zonal → controle manual
+
+---
+
+### VPC
+Selecionar sua VPC
+
+---
+
+### Subnet
+⚠️ IMPORTANTE:
+- Deve ser **SUBNET PÚBLICA**
+
+---
+
+### Connectivity Type
+
+- Public (mais comum)
+- Private (casos avançados)
+
+---
+
+### Elastic IP (EIP)
+
+#### Automático (RECOMENDADO)
+AWS gerencia
+
+#### Manual
+Você cria:
 
 ```bash
-aws ec2 create-route-table --vpc-id vpc-123456
+aws ec2 allocate-address
 ```
 
 ---
 
-## ➕ Adicionar rota para internet
+## ✅ Resultado esperado
+
+- NAT Gateway criado
+- Status: Available
+
+---
+
+# 🔹 7. Criar NAT Gateway (CLI)
 
 ```bash
-aws ec2 create-route   --route-table-id rtb-123456   --destination-cidr-block 0.0.0.0/0   --gateway-id igw-123456
+aws ec2 create-nat-gateway     --subnet-id subnet-publica     --allocation-id eipalloc-123
 ```
 
 ---
 
-## 🔗 Associar Route Table à Subnet
+# 🔹 8. Conectar NAT Gateway à Route Table
+
+## 📌 Subnet PRIVADA
+
+Adicionar rota:
 
 ```bash
-aws ec2 associate-route-table   --subnet-id subnet-123456   --route-table-id rtb-123456
+aws ec2 create-route     --route-table-id rtb-privada     --destination-cidr-block 0.0.0.0/0     --nat-gateway-id nat-123
 ```
 
 ---
 
-# 🔹 3. Subnet Pública vs Privada
-
-## 🌍 Subnet Pública
-
-✔ Tem rota para internet:
-```
-0.0.0.0/0 → IGW
-```
-
-✔ Auto-assign IP público: **ATIVADO**
-
-👉 Permite acesso externo (ex: Load Balancer)
-
----
-
-## 🔒 Subnet Privada
-
-✔ NÃO tem rota direta para IGW
-
-👉 Usada para:
-- Banco de dados
-- Backend
-- Pods internos
-
----
-
-# 🔹 4. Auto-assign Public IP
-
-## 📌 O que é?
-Configuração que define se instâncias recebem IP público automaticamente.
-
-### ✔ Ativar:
-- Subnets públicas
-
-### ❌ Desativar:
-- Subnets privadas
-
----
-
-# 🔹 5. Tags para AWS Load Balancer Controller
-
-## 📌 POR QUE isso é importante?
-
-O controller usa **tags** para descobrir automaticamente:
-- Subnets públicas
-- Subnets privadas
-
----
-
-## 🏷️ PADRÃO OBRIGATÓRIO
+## 🔁 Fluxo de comunicação
 
 ### 🌍 Subnet Pública
-
-```bash
-Key: kubernetes.io/role/elb
-Value: 1
-```
+EC2 → IGW → Internet
 
 ---
 
 ### 🔒 Subnet Privada
+EC2 → NAT → IGW → Internet
 
-```bash
-Key: kubernetes.io/role/internal-elb
-Value: 1
+---
+
+# 🔹 9. Dependências (ENTENDA ISSO)
+
+## Ordem correta:
+
+1. Criar VPC  
+2. Criar Subnets  
+3. Criar IGW  
+4. Attach IGW  
+5. Criar Subnet Pública  
+6. Criar EIP  
+7. Criar NAT Gateway (na subnet pública)  
+8. Criar Route Table privada  
+9. Apontar rota → NAT  
+
+---
+
+# 🔹 10. Relação entre componentes
+
+| Componente | Se conecta com |
+|----------|---------------|
+| IGW | VPC |
+| NAT Gateway | Subnet pública + EIP |
+| Route Table | Subnet |
+| Subnet privada | NAT |
+| Subnet pública | IGW |
+
+---
+
+# 🔹 11. Tags para Load Balancer
+
+## Pública
+```
+kubernetes.io/role/elb = 1
+```
+
+## Privada
+```
+kubernetes.io/role/internal-elb = 1
 ```
 
 ---
 
-## 🧠 Tag de Cluster (IMPORTANTE)
+# 🔹 12. Checklist FINAL
 
-```bash
-Key: kubernetes.io/cluster/NOME-DO-CLUSTER
-Value: shared
-```
-
-ou
-
-```bash
-Value: owned
-```
-
----
-
-## ⚙️ Aplicar TAG via CLI
-
-```bash
-aws ec2 create-tags   --resources subnet-123456   --tags Key=kubernetes.io/role/elb,Value=1
-```
-
----
-
-# 🔹 6. Resumo do Fluxo Completo
-
-1. Criar VPC
-2. Criar Subnets
-3. Criar Internet Gateway
-4. Attach IGW à VPC
-5. Criar Route Table
-6. Adicionar rota:
-   - `0.0.0.0/0 → IGW`
-7. Associar Route Table à Subnet pública
-8. Ativar Auto-assign IP
-9. Adicionar TAGS nas subnets
-
----
-
-# 🔹 7. Checklist Rápido (ERROS COMUNS)
-
-❌ Esqueceu IGW  
-❌ Subnet sem rota para internet  
-❌ Route Table não associada  
-❌ Tags erradas ou ausentes  
-❌ Auto-assign IP desativado  
-
----
-
-# 🔥 Conclusão
-
-Se tudo estiver correto:
-- Load Balancer será criado automaticamente
-- Pods terão acesso correto
-- Infra estará padrão mercado (EKS ready)
+✔ IGW criado e anexado  
+✔ Subnet pública com rota para IGW  
+✔ NAT Gateway criado em subnet pública  
+✔ Subnet privada com rota para NAT  
+✔ EIP associado  
+✔ Tags configuradas  
 
 ---
 
 # 🧪 Exercício prático
 
-1. Crie uma subnet pública
-2. Configure rota para IGW
-3. Ative IP público
-4. Adicione tag:
+1. Criar subnet pública e privada  
+2. Criar IGW  
+3. Criar NAT Gateway  
+4. Configurar route tables  
+5. Testar acesso da EC2 privada  
 
-```bash
-kubernetes.io/role/elb=1
-```
+---
 
-👉 Depois tente subir um Load Balancer no Kubernetes.
+# 🔥 Conclusão
+
+Se tudo estiver certo:
+
+✔ Subnet pública acessa internet direto  
+✔ Subnet privada acessa via NAT  
+✔ Infra pronta para EKS / produção  
