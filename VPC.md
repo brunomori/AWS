@@ -14,7 +14,7 @@ Guia completo e PRÁTICO com:
 # 🔹 1. Arquitetura (VISÃO GERAL)
 
 
-<img width="1200" height="645" alt="image" src="[https://github.com/user-attachments/assets/daa0477c-6ada-4288-92e3-e5f5e34dd60d](https://cdn.prod.website-files.com/6340354625974824cde2e195/6578d079260c3223351bd0d3_6hBOTP_eTKiei4JgB1Ds52pEMmCFRCXP0n66tEh_gQBDNhQ8jtLcSWPPNxpEC3s6YjhsGqBj5bZ1ooFo07T1d16wGGoByH7C-QogSh1Ca2-aXt3QbXLYnrrOf0orVgZ3iwqZPizaUx3cUuAd1v9Uvq8.gif)" />
+<img width="1200" height="645" alt="6578d079260c3223351bd0d3_6hBOTP_eTKiei4JgB1Ds52pEMmCFRCXP0n66tEh_gQBDNhQ8jtLcSWPPNxpEC3s6YjhsGqBj5bZ1ooFo07T1d16wGGoByH7C-QogSh1Ca2-aXt3QbXLYnrrOf0orVgZ3iwqZPizaUx3cUuAd1v9Uvq8" src="https://github.com/user-attachments/assets/8eb4dee2-95a3-4ac1-beb6-ed6f85d2c4e4" />
 
 
 
