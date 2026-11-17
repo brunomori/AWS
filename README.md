@@ -6,6 +6,20 @@
 
 ---
 
+## Materiais de estudo por serviço
+
+| Tema | Material |
+| --- | --- |
+| CLI | [Configuração básica](Config_CLI_Basic.md) · [Autocomplete](Autocomplete.md) |
+| Custos | [Controle de custos](Anti-Custo.md) |
+| Rede | [VPC](VPC.md) |
+| Computação | [EC2](EC2.md) · [Lambda](Lambda.md) |
+| Kubernetes | [EKS](EKS.md) · [Node IAM](Node%20IAM.md) · [OIDC](OIDC%20Provider.md) |
+| Deploy | [Deploy AWS](Deploy%20AWS.md) |
+
+> Material de laboratório. Antes de executar comandos, valide a conta, o perfil, a região, as permissões e os custos envolvidos. Não publique credenciais ou dados de ambientes reais.
+
+
 ## 📑 Índice
 
 | # | Tema |
