@@ -1,0 +1,10 @@
+# Local AWS configuration and credentials
+.aws/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.tfstate
+*.tfstate.*
+.terraform/
